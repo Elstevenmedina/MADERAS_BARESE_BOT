@@ -12,7 +12,7 @@ const app: Express = express()
 const port: number = 3000
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const DB_HOST = 'mongodb://localhost:27017/maderas-barile-backend'
+const DB_HOST = 'mongodb+srv://maderasbaresebd:dREn3bZgEg16tlEV@maderasbaresse.oantw.mongodb.net/maderas'
 
 initDB(DB_HOST)
 
