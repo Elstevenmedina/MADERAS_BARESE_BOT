@@ -5,6 +5,7 @@ import { sendMessagesClients } from './src/whatsapp/send-messages/toClients'
 import { sendDailyClosing } from './src/whatsapp/send-messages/toAdministration/dailyClosing'
 import { sendMessagesSellers } from './src/whatsapp/send-messages/toSellers'
 import { sendClientDebt } from './src/whatsapp/send-messages/toAdministration/clientDebt'
+import { sendNotificaronMessages } from './src/whatsapp/send-messages/toAdministration/notificationMessages'
 
 dotenv.config()
 
@@ -22,4 +23,5 @@ app.listen(port, () => {
   sendDailyClosing.start()
   sendMessagesSellers.start()
   sendClientDebt.start()
+  sendNotificaronMessages.start()
 })

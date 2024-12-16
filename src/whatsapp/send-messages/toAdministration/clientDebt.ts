@@ -3,7 +3,7 @@ import { sendMessage } from '../../initWhatsapp'
 import { ManagementWhatsappNumbers } from '../../../enums/ManagementWhatsappNumbers'
 import { getExpiredDeliveryNotes } from '../../../utils/getExpiredDeliveryNotes'
 
-export const sendClientDebt = new CronJob('0 0 12 * * mon', async () => {
+export const sendClientDebt = new CronJob('0 0 12 * * mon', async () => { //0 0 12 * * mon 
   let notes = await getExpiredDeliveryNotes()
   notes.sort((a, b) => (a.Saldo > b.Saldo) ? -1 : 1)
 

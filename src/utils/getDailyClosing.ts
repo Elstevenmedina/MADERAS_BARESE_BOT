@@ -1,7 +1,6 @@
 import deliveryNotesModel from '../models/deliveryNote'
-import DeliveryNoteModel from '../models/deliveryNote'
 import paymentclientsModel from '../models/paymentclients'
-import PaymentNoteModel from '../models/paymentclients'
+import returnNotesModel from '../models/returnNotes'
 import { getDate, getDateFormatted } from '../moment'
 
 const returnFormatUSD = (amount: number): string => {
@@ -12,6 +11,7 @@ interface ReturnValueDailyClosing {
   amountSold: string
   amountCollected: string
   accountsCollect: string
+  refundAmount: string
 }
 
 export const getDailyClosing = async (): Promise<ReturnValueDailyClosing> => {
@@ -19,13 +19,25 @@ export const getDailyClosing = async (): Promise<ReturnValueDailyClosing> => {
   const dateFormatted = getDateFormatted()
   const deliveryNotes = await deliveryNotesModel.find({ date:dateFormatted }).select('totalAmount')
   const allDeliveryNotes = await deliveryNotesModel.find({ status:'Por cobrar' }).select('balance')
-  let paymentNotes = await paymentclientsModel.find({status: {$ne:'Anulada'}})
-  paymentNotes = paymentNotes.filter((note) => note.createdAt.toString().includes(date))
+  
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  let paymentNotes = await paymentclientsModel.find({
+    createdAt: { $gte: startOfDay, $lte: endOfDay }
+  })
 
+  let refundNotes = await returnNotesModel.find({
+    createdAt: { $gte: startOfDay, $lte: endOfDay }
+  })
 
   let amountSold = 0
   let amountCollected = 0
   let accountsCollect = 0
+  let refundAmount = 0
 
   for (const deliveryNote of deliveryNotes) {
     amountSold = +(amountSold + deliveryNote.totalAmount).toFixed(2)
@@ -36,7 +48,11 @@ export const getDailyClosing = async (): Promise<ReturnValueDailyClosing> => {
   }
 
   for (const note of paymentNotes) {
-    amountCollected = +(accountsCollect + note.totalAmount).toFixed(2)
+    amountCollected = +(amountCollected + note.totalAmount).toFixed(2)
+  }
+
+  for(const note of refundNotes) {
+    refundAmount = +(refundAmount + note.totalAmount).toFixed(2)
   }
 
 
@@ -45,7 +61,9 @@ export const getDailyClosing = async (): Promise<ReturnValueDailyClosing> => {
     amountSold: returnFormatUSD(amountSold),
     amountCollected: returnFormatUSD(amountCollected),
     accountsCollect: returnFormatUSD(accountsCollect),
+    refundAmount: returnFormatUSD(refundAmount),
   }
+
 
   return dailyClosing
 }
