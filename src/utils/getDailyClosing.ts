@@ -17,18 +17,19 @@ interface ReturnValueDailyClosing {
 export const getDailyClosing = async (): Promise<ReturnValueDailyClosing> => {
   const date = getDate()
   const dateFormatted = getDateFormatted()
-  const deliveryNotes = await deliveryNotesModel.find({ date:dateFormatted }).select('totalAmount')
-  const allDeliveryNotes = await deliveryNotesModel.find({ status:'Por cobrar' }).select('balance')
-  
+  const deliveryNotes = await deliveryNotesModel.find({ date: dateFormatted }).select('totalAmount')
+  const allDeliveryNotes = await deliveryNotesModel.find({ status: 'Por cobrar' }).select('balance')
+
+  let datePaymentArray = dateFormatted.split('/')
+  datePaymentArray = datePaymentArray.reverse()
+  let datePayment = datePaymentArray.join('-')
+  let paymentNotes = await paymentclientsModel.find({realDatePayment:datePayment})
+
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
   
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
-  
-  let paymentNotes = await paymentclientsModel.find({
-    createdAt: { $gte: startOfDay, $lte: endOfDay }
-  })
 
   let refundNotes = await returnNotesModel.find({
     createdAt: { $gte: startOfDay, $lte: endOfDay }
